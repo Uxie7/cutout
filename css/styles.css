@@ -602,6 +602,60 @@ p {
   line-height: 1.55;
 }
 
+.info-card {
+  padding: 17px 19px;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding: 4px;
+  border: 1px solid #ededf2;
+  border-radius: 11px;
+  background: #f7f7fa;
+}
+
+.auth-tab {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  color: #777987;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.auth-tab:hover {
+  color: var(--ink);
+}
+
+.auth-tab.is-active {
+  color: var(--purple-dark);
+  background: white;
+  box-shadow: 0 1px 4px rgb(32 33 42 / 9%);
+}
+
+.text-button {
+  display: block;
+  margin: 14px 0 0 auto;
+  padding: 4px 0;
+  border: 0;
+  color: var(--purple-dark);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.text-button:hover {
+  text-decoration: underline;
+}
+
+.login-form .primary-button:disabled {
+  cursor: wait;
+}
+
 .watermark-settings {
   display: grid;
   gap: 14px;

@@ -1,23 +1,61 @@
 # Cutout
 
-A standalone HTML, CSS, and JavaScript version of the Cutout frontend. It uses native browser APIs and has no framework or package dependencies.
+Cutout is a small HTML, CSS, and JavaScript image workspace with Supabase Auth, PostgreSQL metadata, private Supabase Storage, and an optional Python background-removal API.
 
-## Run locally
+## 1. Create the Supabase project
 
-Use a local static file server from this folder. ES modules and browser storage may not work when opening `index.html` directly with `file://`.
+1. Create a Supabase project and enable email/password authentication.
+2. Set the Auth site URL to the frontend origin you use locally (for example `http://127.0.0.1:8765`) and allow that origin as a redirect URL; password recovery returns to the site root.
+3. Open the Supabase SQL editor and run [`supabase/migrations/001_images.sql`](./supabase/migrations/001_images.sql). This creates the image metadata table, user-scoped row policies, a private storage bucket, and matching per-user storage policies.
+4. In [`js/config.js`](./js/config.js), replace `SUPABASE_URL` with the project URL and `SUPABASE_ANON_KEY` with the project's public anon/publishable key. The browser key is public by design; the database and storage policies are the security boundary.
+
+Never put a Supabase service-role key in `js/config.js` or any browser-delivered file. This project does not require a service-role key.
+
+## 2. Run the frontend
+
+From this folder:
 
 ```powershell
-python -m http.server 8080
+python -m http.server 8765
 ```
 
-Then visit <http://localhost:8080>.
+Open <http://127.0.0.1:8765>. The frontend loads the Supabase JavaScript client from `esm.sh`, so an internet connection is required for authentication and cloud image operations.
 
-## Local preview behavior
+## 3. Run the Python background-removal API
 
-- Sign-in is a local demo gate only. It does not verify accounts or protect server resources.
-- PNG, JPG, and WebP images up to 20 MB can be prepared in the browser.
-- Watermarks are rendered in the browser; prepared images are stored in IndexedDB and can be downloaded or removed from the gallery.
-- Background removal is unavailable because this static frontend has no image-processing service connected.
-- Images and demo access remain in the current browser. Clearing browser site data removes them.
+In another PowerShell window:
 
-To deploy real authentication or background removal, connect a trusted backend; do not treat the demo gate as production security.
+```powershell
+Set-Location .\backend
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+Copy-Item .env.example .env
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Edit `backend/.env` and set the same Supabase project URL and public anon/publishable key. The API sends the signed-in access token to Supabase Auth to verify the user; it does not accept a user ID from the browser as proof of identity. The default CPU model is `u2net` and is downloaded on first use by `rembg`. Expect that first request to take longer and need additional memory.
+
+Set `CORS_ORIGINS` to the exact frontend origins used by your deployment; do not use `*` for a production deployment. For deployment, also change `BACKGROUND_REMOVAL_API_URL` in `js/config.js` to the HTTPS API URL. Both frontend and API should use HTTPS.
+
+## What is connected
+
+- Email/password sign-up and sign-in, sign-out, session restore, password-reset email, and password update after recovery.
+- Per-user image metadata in PostgreSQL and image files in a private Storage bucket.
+- Signed gallery previews, downloads, deletion, and browser-side watermarking.
+- Authenticated background removal via `POST /api/images/remove-background`.
+- 20 MB input/output image limit and user-scoped SQL/storage policies.
+
+## Tests
+
+```powershell
+Set-Location .\backend
+python -m unittest discover -s tests
+python -m compileall -q app tests
+```
+
+The Python tests cover the API's Supabase token-verification boundary. They do not call Supabase or download/run the image model.
+
+## Before production
+
+Configure Supabase email delivery, allowed redirect URLs, and storage policies for the real domain. Add rate limits and per-user processing quotas to the image API, monitor model memory/runtime, and test access isolation with two separate accounts. The background-removal API and frontend are not deployed by these local run commands.

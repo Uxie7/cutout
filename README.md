@@ -13,9 +13,10 @@ Never put a Supabase service-role key in `js/config.js` or any browser-delivered
 
 ## 2. Run the frontend
 
-From this folder:
+After the one-time Supabase setup, open PowerShell in the `Cutout-New` folder and run:
 
 ```powershell
+Set-Location C:\Users\DELL\Downloads\migrate-projects\Cutout-New
 python -m http.server 8765
 ```
 
@@ -23,16 +24,17 @@ Open <http://127.0.0.1:8765>. The frontend loads the Supabase JavaScript client 
 
 ## 3. Run the Python background-removal API
 
-In another PowerShell window:
+Run the API manually in a second PowerShell window:
 
 ```powershell
-Set-Location .\backend
-py -3.12 -m venv .venv
+Set-Location C:\Users\DELL\Downloads\migrate-projects\Cutout-New\backend
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-Copy-Item .env.example .env
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+Run `Copy-Item .env.example .env` once if `backend\.env` does not exist, then add the Supabase values.
 
 Edit `backend/.env` and set the same Supabase project URL and public anon/publishable key. The API sends the signed-in access token to Supabase Auth to verify the user; it does not accept a user ID from the browser as proof of identity. The default CPU model is `u2net` and is downloaded on first use by `rembg`. Expect that first request to take longer and need additional memory.
 

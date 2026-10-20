@@ -23,8 +23,8 @@ services:
       - key: ORT_NUM_THREADS
         value: "1"
 
-staticSites:
-  - name: cutout-frontend
+  - type: static_site
+    name: cutout-frontend
     buildCommand: ""
     staticPublishPath: .
     pullRequestPreviewsEnabled: false

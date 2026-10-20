@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: cutout-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: BACKGROUND_REMOVAL_MODEL
+        value: u2netp
+      - key: CORS_ORIGINS
+        value: https://cutout-frontend.onrender.com
+      - key: MAX_IMAGE_BYTES
+        value: "20971520"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: ORT_NUM_THREADS
+        value: "1"
+
+staticSites:
+  - name: cutout-frontend
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false

@@ -36,9 +36,19 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 Run `Copy-Item .env.example .env` once if `backend\.env` does not exist, then add the Supabase values.
 
-Edit `backend/.env` and set the same Supabase project URL and public anon/publishable key. The API sends the signed-in access token to Supabase Auth to verify the user; it does not accept a user ID from the browser as proof of identity. The default CPU model is `u2net` and is downloaded on first use by `rembg`. Expect that first request to take longer and need additional memory.
+Edit `backend/.env` and set the same Supabase project URL and public anon/publishable key. The API sends the signed-in access token to Supabase Auth to verify the user; it does not accept a user ID from the browser as proof of identity. The default CPU model is `u2netp` and is downloaded on first use by `rembg`. It is smaller than `u2net`, but the first request still takes longer while the model loads.
 
 Set `CORS_ORIGINS` to the exact frontend origins used by your deployment; do not use `*` for a production deployment. For deployment, also change `BACKGROUND_REMOVAL_API_URL` in `js/config.js` to the HTTPS API URL. Both frontend and API should use HTTPS.
+
+## 4. Deploy frontend and API together on Render
+
+This repository includes [`render.yaml`](./render.yaml), which defines one Render Static Site for the frontend and one Render Web Service for the FastAPI API. In Render, choose **New > Blueprint**, connect `archangel2006/cutout`, and apply the blueprint.
+
+The blueprint uses the free plan, one API worker, the smaller `u2netp` model, and one ONNX thread to keep memory and CPU usage low. The first removal can still be slow while the model downloads, and Render may sleep the free service when idle. If the model exceeds the free instance memory limit, switch `BACKGROUND_REMOVAL_MODEL` to `silueta` in Render; it is another supported lower-footprint model.
+
+When Render prompts for secret values, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` on the `cutout-api` service only. Never commit `backend/.env`; use [`backend/.env.example`](./backend/.env.example) as the list of required settings. After the services deploy, confirm the generated service names match `cutout-api.onrender.com` and `cutout-frontend.onrender.com`; if Render assigns different URLs, update `CORS_ORIGINS` on the API and `BACKGROUND_REMOVAL_API_URL` in [`js/config.js`](./js/config.js), then redeploy the frontend.
+
+Finally, set the deployed frontend URL as the Supabase Auth Site URL and add it to the allowed redirect URLs.
 
 ## What is connected
 

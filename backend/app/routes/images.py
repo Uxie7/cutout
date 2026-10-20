@@ -68,7 +68,7 @@ async def remove_background(
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning) as error:
         raise HTTPException(status_code=400, detail="The uploaded file is not a valid image.") from error
 
-    model_name = os.environ.get("BACKGROUND_REMOVAL_MODEL", "u2net")
+    model_name = os.environ.get("BACKGROUND_REMOVAL_MODEL", "u2netp")
     if model_name not in ALLOWED_MODELS:
         raise HTTPException(status_code=500, detail="The configured background-removal model is not supported.")
 

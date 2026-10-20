@@ -42,7 +42,7 @@ Set `CORS_ORIGINS` to the exact frontend origins used by your deployment; do not
 
 ## 4. Deploy frontend and API together on Render
 
-This repository includes [`render.yaml`](./render.yaml), which defines one Render Static Site for the frontend and one Render Web Service for the FastAPI API. In Render, choose **New > Blueprint**, connect `archangel2006/cutout`, and apply the blueprint.
+This repository includes [`render.yaml`](./render.yaml), which defines two Render Web Services: one for the frontend and one for the FastAPI API. The frontend is served by Python's built-in static server because Render Blueprint validation does not accept a static-site service in this setup. In Render, choose **New > Blueprint**, connect `archangel2006/cutout`, and apply the blueprint.
 
 The blueprint uses the free plan, one API worker, the smaller `u2netp` model, and one ONNX thread to keep memory and CPU usage low. The first removal can still be slow while the model downloads, and Render may sleep the free service when idle. If the model exceeds the free instance memory limit, switch `BACKGROUND_REMOVAL_MODEL` to `silueta` in Render; it is another supported lower-footprint model.
 

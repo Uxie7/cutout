@@ -23,8 +23,11 @@ services:
       - key: ORT_NUM_THREADS
         value: "1"
 
-  - type: static_site
+  - type: web
     name: cutout-frontend
+    runtime: python
+    rootDir: .
     buildCommand: ""
-    staticPublishPath: .
-    pullRequestPreviewsEnabled: false
+    startCommand: python -m http.server $PORT --bind 0.0.0.0
+    healthCheckPath: /
+    plan: free
